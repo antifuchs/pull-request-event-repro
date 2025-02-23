@@ -1,0 +1,48 @@
+name: "Reproducer for PRs that get closed despite having new changes not on main"
+on:
+  pull_request:
+    types: [edited]
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  commit_and_create_pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: fregante/setup-git-user@v2
+      - name: "Current date"
+        run: |
+          echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+        id: version # this is used on variable path
+      - name: Add a git commit
+        run: |
+          git checkout -b branch-${{steps.version.outputs.date}}
+          echo "hi there" >> added-file
+          git add added-file
+          git commit -m "Say 'hi there'"
+      - name: Display metadata
+        run: |
+          set -x
+          git log origin/main..HEAD
+          git diff --stat origin/main..HEAD
+          git diff origin/main..HEAD
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{github.token}}
+          commit-message: "Bump versions"
+          assignees: antifuchs
+          branch: say-hi
+          base: main
+          title: "Say hi"
+          labels: ""
+          body: |
+            This PR adds a file that says hi!
+
+            To re-run the workflow:
+            - [ ] check this box.
