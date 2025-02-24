@@ -1,6 +1,6 @@
 name: "Reproducer for PRs that get closed despite having new changes not on main"
 on:
-  pull_request:
+  pull_request_target:
     types: [edited]
     branches:
       - main
@@ -15,9 +15,15 @@ jobs:
   commit_and_create_pr:
     runs-on: ubuntu-latest
     steps:
+      - name: Debug the webhook triggering us
+        env:
+          HOOK: ${{toJSON(github.event)}}
+        run: |
+          echo "$HOOK"
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{github.ref_name}}
       - uses: fregante/setup-git-user@v2
       - name: "Current date"
         run: |
@@ -40,7 +46,7 @@ jobs:
           token: ${{secrets.PR_TOKEN}}
           commit-message: "Bump versions"
           assignees: antifuchs
-          branch: say-hi
+          branch: say-hi-with-target
           base: main
           title: "Say hi"
           labels: ""
