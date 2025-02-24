@@ -21,7 +21,6 @@ jobs:
         id: version # this is used on variable path
       - name: Add a git commit
         run: |
-          git checkout -b branch-${{steps.version.outputs.date}}
           echo "hi there" >> added-file
           git add added-file
           git commit -m "Say 'hi there'"
