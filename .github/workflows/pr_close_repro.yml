@@ -25,6 +25,10 @@ jobs:
         id: version # this is used on variable path
       - name: Add a git commit
         run: |
+          # Remove the merge commit from history:
+          git show HEAD^
+          git reset --hard HEAD^
+
           echo "hi there" >> added-file
           git add added-file
           git commit -m "Say 'hi there'"
